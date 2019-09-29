@@ -1,0 +1,38 @@
+{
+  "name": "sequelize-crud",
+  "version": "1.0.0",
+  "description": "sequelize utilitary from fast CRUD",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "babel src --out-dir lib",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dahem/sequelize-crud.git"
+  },
+  "keywords": [
+    "sequelize",
+    "express",
+    "crud",
+    "util"
+  ],
+  "author": "dahem farr dahemfarr@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dahem/sequelize-crud/issues"
+  },
+  "homepage": "https://github.com/dahem/sequelize-crud#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.6.2",
+    "@babel/core": "^7.6.2",
+    "@babel/node": "^7.6.2",
+    "@babel/preset-env": "^7.6.2",
+    "babel-eslint": "^10.0.3",
+    "eslint": "^6.4.0"
+  },
+  "peerDependencies": {
+    "sequelize": "^5.19.0",
+    "lodash": "^4.17.15"
+  }
+}
