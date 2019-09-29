@@ -5,6 +5,7 @@ module.exports = {
     filename: 'index.js',
     library: 'sequelize-crud',
     libraryTarget: 'umd',
+    globalObject: "this",
   },
   module: {
     rules: [

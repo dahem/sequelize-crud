@@ -1,7 +1,7 @@
 import _ from 'lodash';
+import { Op } from 'sequelize';
 import { isExtrictedObject } from '../helpers/object';
 import { capitalize } from '../helpers/string';
-import { Op } from 'sequelize';
 
 async function simpleValidate(model, values) {
   try {
