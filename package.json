@@ -1,6 +1,6 @@
 {
   "name": "sequelize-crud",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "sequelize utilitary from fast CRUD",
   "main": "lib/index.js",
   "repository": {
@@ -40,5 +40,7 @@
     "webpack-cli": "^3.3.9"
   },
   "peerDependencies": {},
-  "dependencies": {}
+  "dependencies": {
+    "@babel/polyfill": "^7.6.0"
+  }
 }

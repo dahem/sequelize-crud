@@ -1,3 +1,4 @@
+import "@babel/polyfill";
 import * as utilModels from './models';
 import * as utilMigration from './models/migration';
 import baseController from './controllers/baseController';
