@@ -5,7 +5,7 @@ import crudRouter from './routes/crudRouter';
 import addBasicRouters from './routes/addBasicRouters';
 import validateReq from './routes/validateRequest';
 import * as sanitize from './routes/sanitize';
-import importDataRouter from './routes/importDataRouter';
+// import importDataRouter from './routes/importDataRouter';
 
 export {
   utilModels,
@@ -15,5 +15,5 @@ export {
   validateReq,
   sanitize,
   addBasicRouters,
-  importDataRouter,
+  // importDataRouter,
 };

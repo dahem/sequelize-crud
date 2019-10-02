@@ -1,4 +1,4 @@
-
+// TODO fix with npm
 export default (model, LIMIT_IMPORT_DATA = 1000) => async (req, res, next) => {
   try {
     if (req.body.length > LIMIT_IMPORT_DATA) {
