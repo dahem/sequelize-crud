@@ -1,44 +1,33 @@
 
-export const transaction = (fn, conn) => sequelize.transaction(fn);
-// prettier-ignore
 export const createTable = (tableName, defineTable) => (
-  (queryInterface, Sequelize) => (
-    transaction(() => queryInterface.createTable(tableName, defineTable(Sequelize)), conn)
-  )
-);
-// prettier-ignore
-export const dropTable = (tableName, conn) => (
-  queryInterface => (
-    transaction(() => queryInterface.dropTable(tableName), conn)
-  )
+  (queryInterface, Sequelize) => queryInterface.createTable(tableName, defineTable(Sequelize))
 );
 
-export const createAndDropTable = (tableName, defineTable, conn) => ({
-  up: createTable(tableName, defineTable, conn),
-  down: dropTable(tableName, conn),
+export const dropTable = tableName => queryInterface => queryInterface.dropTable(tableName);
+
+export const createAndDropTable = (tableName, defineTable) => ({
+  up: createTable(tableName, defineTable),
+  down: dropTable(tableName),
 });
 
-export const insertAndDeleteTable = (tableName, data, model = null, conn) => {
+export const insertAndDeleteTableItems = (tableName, data, model = null) => {
   if (Array.isArray(data) && model === null) {
     return {
-      up: queryInterface => transaction(() => queryInterface.bulkInsert(tableName, data), conn),
+      up: queryInterface => queryInterface.bulkInsert(tableName, data),
       down: queryInterface => queryInterface.bulkDelete(tableName),
     };
   }
 
   if (Array.isArray(data) && model !== null) {
     return {
-      up: () => transaction(() => data.map(x => model.create(x)), conn),
+      up: () => Promise.all(data.map(x => model.create(x))),
       down: queryInterface => queryInterface.bulkDelete(tableName),
     };
   }
 
   if (!Array.isArray(data)) {
     return {
-      up: queryInterface => transaction(async () => {
-        const resultData = await data();
-        return queryInterface.bulkInsert(tableName, resultData);
-      }, conn),
+      up: queryInterface => data().then(res => queryInterface.bulkInsert(tableName, res)),
       down: queryInterface => queryInterface.bulkDelete(tableName),
     };
   }
@@ -56,4 +45,9 @@ export const defaultColumns = Sequelize => ({
   externalId: { type: Sequelize.INTEGER, unique: true },
   active: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: true },
   ...timestampsColumns(Sequelize),
+});
+
+export const activeAndExternalField = Sequelize => ({
+  externalId: { type: Sequelize.INTEGER, unique: true },
+  active: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: true },
 });

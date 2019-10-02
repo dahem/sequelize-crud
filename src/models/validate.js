@@ -52,25 +52,28 @@ async function getErrors(model, values) {
   );
 
   const { uniqueKeys } = model;
+
   const uniqueQuery = Object.keys(uniqueKeys).map((key) => {
     const uniqueItem = {};
     uniqueKeys[key].fields.forEach((field) => {
-      uniqueItem[field] = values[field];
+      if (values[field] != undefined) {
+        uniqueItem[field] = values[field];
+      }
     });
     return uniqueItem;
-  });
+  }).filter(x => Object.keys(x).length > 0);
 
   if (uniqueQuery.length === 0) {
     return errors;
   }
   const invalidUniqueCount = await model.count({ where: { [Op.or]: uniqueQuery } });
   if (invalidUniqueCount > 0) {
-    errors.push(new Error(`unique ${uniqueQuery.map(x => Object.keys(x).join(',')).join(', ')}`));
+    errors.push(new Error(`the next fields are unique ${uniqueQuery.map(x => Object.keys(x).join(' and ')).join(', ')}`));
   }
   return errors;
 }
 
-export async function validate(model, values) {
+export async function validateToCreate(model, values) {
   const errors = _.flattenDeep(await getErrors(model, values));
   if (errors.length > 0) throw new Error(errors.join(', '));
   return 1;
