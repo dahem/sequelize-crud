@@ -75,8 +75,8 @@ export async function fullCreate(model, body) {
   return instance.update(body);
 }
 
-export async function verifyPk(model, id) {
-  const error = await getErrorVerifyPk(model, id);
+export async function verifyPk(model, id, query) {
+  const error = await getErrorVerifyPk(model, id, query);
   if (error !== null) throw new Error(error);
 }
 

@@ -12,10 +12,10 @@ async function simpleValidate(model, values) {
   }
 }
 
-export async function getErrorVerifyPk(model, id) {
+export async function getErrorVerifyPk(model, id, query) {
   try {
-    const instance = await model.findByPk(id, { raw: true, atributes: ['id'] });
-    if (instance === null) return new Error('Id no found');
+    const hasInstance = await model.count({ where: { ...query, id } });
+    if (hasInstance !== 1) return new Error('Id no found');
     return null;
   } catch (error) {
     return error;

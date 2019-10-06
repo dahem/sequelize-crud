@@ -28,7 +28,12 @@ export default function (router, controller, model, options = {}) {
     router.get(
       '/:id(\\d+)/',
       sanitizeParam('id').toInt(),
-      validate([[param('id').custom(id => model.verifyPk(id)), 404]]),
+      validate([[
+        param('id').custom((id, { req }) => (
+          model.verifyPk(id, req.query)
+        )),
+        404,
+      ]]),
       async (req, res, next) => {
         try {
           const { id } = req.params;
@@ -44,11 +49,16 @@ export default function (router, controller, model, options = {}) {
   if (uuid === true && (!methods || methods.includes('getById'))) {
     router.get(
       '/:id',
-      validate([[param('id').custom(id => model.verifyPk(id)), 404]]),
+      validate([[
+        param('id').custom((id, { req }) => (
+          model.verifyPk(id, req.query)
+        )),
+        404,
+      ]]),
       async (req, res, next) => {
         try {
           const { id } = req.params;
-          const instance = await controller.getById(id);
+          const instance = await controller.getById(id, req.query);
           return res.status(200).send(instance);
         } catch (e) {
           return next(e);
@@ -79,7 +89,12 @@ export default function (router, controller, model, options = {}) {
       sanitizeParam('id').toInt(),
       sanitizeBody().customSanitizer(values => sanitizeToUpdate(model, values)),
       validate([
-        [param('id').custom(id => model.verifyPk(id)), 404],
+        [
+          param('id').custom((id, { req }) => (
+            model.verifyPk(id, req.query)
+          )),
+          404,
+        ],
         body().custom((values, { req }) => {
           const { id } = req.params;
           return model.validateToUpdate({ ...values, id });
@@ -101,7 +116,12 @@ export default function (router, controller, model, options = {}) {
       '/:id',
       sanitizeBody().customSanitizer(values => sanitizeToUpdate(model, values)),
       validate([
-        [param('id').custom(id => model.verifyPk(id)), 404],
+        [
+          param('id').custom((id, { req }) => (
+            model.verifyPk(id, req.query)
+          )),
+          404,
+        ],
         body().custom((values, { req }) => {
           const { id } = req.params;
           return model.validateToUpdate({ ...values, id });
@@ -122,7 +142,12 @@ export default function (router, controller, model, options = {}) {
     router.delete(
       '/:id',
       sanitizeParam('id').toInt(),
-      validate([[param('id').custom(id => model.verifyPk(id)), 404]]),
+      validate([[
+        param('id').custom((id, { req }) => (
+          model.verifyPk(id, req.query)
+        )),
+        404,
+      ]]),
       async (req, res, next) => {
         try {
           const instance = await controller.remove(req.params.id);

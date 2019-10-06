@@ -30,7 +30,10 @@ function buildQueryFromSearchParam(model, query) {
 }
 
 function getById(model, id, options) {
-  return model.findByPk(id, { include: [{ all: true }], ...options });
+  return model.findByPk(id, {
+    include: [{ all: true }],
+    ...options,
+  });
 }
 
 async function create(model, body, options) {
