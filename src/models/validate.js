@@ -15,7 +15,7 @@ async function simpleValidate(model, values) {
 export async function getErrorVerifyPk(model, id, query) {
   try {
     const hasInstance = await model.count({ where: { ...query, id } });
-    if (hasInstance !== 1) return new Error('Id no found');
+    if (hasInstance !== 1) return new Error('Id or some query don\'t match');
     return null;
   } catch (error) {
     return error;

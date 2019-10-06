@@ -22,16 +22,21 @@ export default validationsParam => async (req, res, next) => {
     ? validationsParam : [validationsParam];
 
   await Promise.all(
-    validations.map((item) => {
+    validations.map(async (item) => {
       let validation = null;
+      let errorStatus = null;
       if (Array.isArray(item)) {
         validation = item[0];
-        statusErrors.push(item[1]);
+        errorStatus = item[1];
       } else {
         validation = item;
-        statusErrors.push(422);
+        errorStatus = 422;
       }
-      return validation.run(req);
+      const result = await validation.run(req);
+      if (result._errors.length > 0) {
+        statusErrors.push(errorStatus);
+      }
+      return result;
     }),
   );
 
