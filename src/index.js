@@ -7,6 +7,7 @@ import addBasicRouters from './routes/addBasicRouters';
 import validateReq from './routes/validateRequest';
 import * as sanitize from './routes/sanitize';
 import importDataRouter from './routes/importDataRouter';
+import generateApiConstants from './routes/generateApiConstants';
 
 export {
   utilModels,
@@ -17,4 +18,5 @@ export {
   sanitize,
   addBasicRouters,
   importDataRouter,
+  generateApiConstants,
 };
