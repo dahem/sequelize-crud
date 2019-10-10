@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { Op } from 'sequelize';
-import { isExtrictedObject } from '../helpers/object';
+import { isExtrictedObject, objHas } from '../helpers/object';
 import { capitalize } from '../helpers/string';
 
 async function simpleValidate(model, values) {
@@ -14,7 +14,30 @@ async function simpleValidate(model, values) {
 
 export async function getErrorVerifyPk(model, id, query) {
   try {
-    const hasInstance = await model.count({ where: { ...query, id } });
+
+    const pkField = Object.keys(model.primaryKeys)[0];
+    const include = [];
+
+    if (query !== undefined) {
+      // TODO add for HasMany
+      const belongsToManyAssoc = Object.values(model.associations)
+        .filter(assoc => assoc.associationType === 'BelongsToMany')
+        .map(assoc => ({
+          model: assoc.target,
+          targetField: assoc.targetKeyField,
+          field: assoc.foreignIdentifierField,
+        }));
+
+      belongsToManyAssoc.forEach(({ model, targetField, field }) => {
+        if (objHas(query, field)) {
+          include.push({ model, where: { [targetField]: query[field] } });
+          delete query[field];
+        }
+      });
+    }
+    console.log(include);
+    const hasInstance = await model.count({ where: { ...query, [pkField]: id }, include });
+
     if (hasInstance !== 1) return new Error('Id or some query don\'t match');
     return null;
   } catch (error) {
