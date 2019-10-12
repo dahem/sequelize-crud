@@ -68,8 +68,12 @@ async function getErrors(model, values) {
       Object.keys(values)
         .filter(field => isExtrictedObject(values[field]))
         .map(async (field) => {
-          const assocModel = model.associations[field].target;
-          return getErrors(assocModel, values[field]);
+          if (model.associations[field]) {
+            const assocModel = model.associations[field].target;
+            return getErrors(assocModel, values[field]);
+          } else {
+            return [];
+          }
         }),
     ),
   );
@@ -137,12 +141,17 @@ async function getErrorsToUpdate(availableIds, model, values) {
       Object.keys(values)
         .filter(field => isExtrictedObject(values[field]))
         .map(async (field) => {
-          const assocModel = model.associations[field].target;
-          const subAvailable = await instance[`get${capitalize(field)}`]({
-            attributes: ['id'],
-            raw: true,
-          });
-          return getErrorsToUpdate([subAvailable.id], assocModel, values[field]);
+          if (model.associations[field]) {
+            const assocModel = model.associations[field].target;
+            const subAvailable = await instance[`get${capitalize(field)}`]({
+              attributes: ['id'],
+              raw: true,
+            });
+
+            return getErrorsToUpdate([subAvailable.id], assocModel, values[field]);
+          } else {
+            return [];
+          }
         }),
     ),
   );
