@@ -35,7 +35,7 @@ export async function getErrorVerifyPk(model, id, query) {
         }
       });
     }
-    console.log(include);
+
     const hasInstance = await model.count({ where: { ...query, [pkField]: id }, include });
 
     if (hasInstance !== 1) return new Error('Id or some query don\'t match');
@@ -81,10 +81,13 @@ async function getErrors(model, values) {
   const { uniqueKeys } = model;
 
   const uniqueQuery = Object.keys(uniqueKeys).map((key) => {
-    const uniqueItem = {};
+    let uniqueItem = {};
     uniqueKeys[key].fields.forEach((field) => {
       if (values[field] != undefined) {
         uniqueItem[field] = values[field];
+      } else {
+        uniqueItem = {};
+        return;
       }
     });
     return uniqueItem;

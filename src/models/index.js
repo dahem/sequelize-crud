@@ -13,6 +13,7 @@ export async function upsert(model, values) {
 }
 
 export function manyUpsert(model, values) {
+  if (isExtrictedObject(values)) return upsert(model, values);
   return Promise.all(values.map(val => upsert(model, val)));
 }
 
