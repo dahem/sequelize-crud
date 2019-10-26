@@ -42,7 +42,7 @@ export const timestampsColumns = Sequelize => ({
 });
 
 export const defaultColumns = Sequelize => ({
-  externalId: { type: Sequelize.INTEGER, unique: true },
+  externalId: { type: Sequelize.INTEGER },
   active: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: true },
   ...timestampsColumns(Sequelize),
 });

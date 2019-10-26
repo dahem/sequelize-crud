@@ -26,7 +26,7 @@ export default function (router, controller, model, options = {}) {
 
   if (uuid !== true && (!methods || methods.includes('getById'))) {
     router.get(
-      '/:id(\\d+)/',
+      '/:id(\\d+)',
       sanitizeParam('id').toInt(),
       validate([
         [param('id').custom(id => model.verifyPk(id)), 404],
