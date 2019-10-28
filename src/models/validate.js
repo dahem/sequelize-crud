@@ -19,7 +19,6 @@ export async function getErrorVerifyPk(model, id, query) {
     const include = [];
 
     if (query !== undefined) {
-      // TODO add for HasMany
       const belongsToManyAssoc = Object.values(model.associations)
         .filter(assoc => assoc.associationType === 'BelongsToMany')
         .map(assoc => ({
@@ -46,7 +45,7 @@ export async function getErrorVerifyPk(model, id, query) {
 }
 
 async function getErrors(model, values) {
-  if (!isExtrictedObject(values)) {
+  if (!isExtrictedObject(values)) { // if values is not a object try if is a id
     const error = await getErrorVerifyPk(model, values);
     return error !== null ? [error] : [];
   }
@@ -55,10 +54,10 @@ async function getErrors(model, values) {
   errors.push(
     await Promise.all(
       Object.keys(values)
-        .filter(field => Array.isArray(values[field]))
+        .filter(field => Array.isArray(values[field])) // if is a array is an association
         .map(async (field) => {
           const assocModel = model.associations[field].target;
-          return Promise.all(values[field].map(assoc => getErrors(assocModel, assoc)));
+          return Promise.all(values[field].map(assoc => getErrors(assocModel, assoc))); // do get Error for each model assoc
         }),
     ),
   );
@@ -66,7 +65,7 @@ async function getErrors(model, values) {
   errors.push(
     await Promise.all(
       Object.keys(values)
-        .filter(field => isExtrictedObject(values[field]))
+        .filter(field => isExtrictedObject(values[field]))  // if field is an object can be assoc or json type 
         .map(async (field) => {
           if (model.associations[field]) {
             const assocModel = model.associations[field].target;
