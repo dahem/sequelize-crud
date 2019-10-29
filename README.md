@@ -263,3 +263,69 @@ const addresses = [{
 // userId will be change to real id in the database
 ```
 
+## controller
+base controller script has the next methods:
+```js
+getById: (id, options = {}) => {},
+getAll: (query, options = {}) => {},
+create: (body, options = {}) => {},
+update: (id, body, options = {}) => {},
+remove: (id, options = {}) => {},
+```
+
+in options will be { include :[...]} 
+
+```js
+import { baseController } from 'sequelize-crud';
+const controller = baseController(Account);
+export default {
+  ...controller,
+  getAll: query => controller.getAll(query, { // overwrite method
+    include: [{ model: User }],
+  }),
+  create: async (body) => {
+    const { otherField, ...rest } = body;
+    // do another function with otherField
+    return controller.create(rest);
+  },
+};
+
+```
+
+## router
+
+### crudRouter
+
+you have get, post, patch, delete
+```js
+options: {
+  methods: ['getAll', 'getById','create', 'update', 'remove'] //  default all
+  uuid: true|false //default false it is for getById,update and remove pk on model
+  controller: baseController | customController, // default baseController
+}
+```
+```js
+import { crudRouter } from 'sequelize-crud'; 
+router.use('/clients', crudRouter(Client, options));
+```
+### validateReq
+```js
+import { validateReq } from 'sequelize-crud'; // check express-validators
+router.post('/auth',
+  validateReq(check(['username', 'password'], 'username and password are required').exists()),
+  async (req, res, next) => {
+  });
+```
+### sanitize
+
+### importDataRouter
+```js
+import { importDataRouter } from 'sequelize-crud';
+router.post('/user-groups', importDataRouter(models.UserGroup));
+```
+### generateApiConstants
+
+```js
+import { generateApiConstants } from 'sequelize-crud';
+router.use('/constants', generateApiConstants(models));
+```
