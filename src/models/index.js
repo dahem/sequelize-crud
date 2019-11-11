@@ -9,7 +9,6 @@ import { validateToCreate, validateToUpdate } from './validate';
 export async function upsert(model, values) {
   if (!isExtrictedObject(values)) return model.findByPk(values);
   if (values.id === undefined) {
-    console.log(model.tableName, values);
     return model.create(values);
   }
   const instance = await model.findByPk(values.id);
