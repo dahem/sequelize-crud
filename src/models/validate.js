@@ -112,7 +112,7 @@ async function getErrorsToUpdate(availableIds, model, values) {
   const errors = [];
   if (!isExtrictedObject(values)) return [];
   if (availableIds !== null) {
-    return availableIds.includes(values.id) ? [] : [new Error(`Id not is associate:${values.id}`)];
+    return availableIds.includes(values.id) || values.id === undefined  ? [] : [new Error(`Id not is associate:${values.id}`)];
   }
 
   try {

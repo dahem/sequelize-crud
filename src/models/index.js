@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { Op } from 'sequelize';
 import { isExtrictedObject, objHas } from '../helpers/object';
 import { unCapitalize, capitalize } from '../helpers/string';
 import { getErrorVerifyPk } from './validate';
@@ -7,7 +8,10 @@ import { validateToCreate, validateToUpdate } from './validate';
 
 export async function upsert(model, values) {
   if (!isExtrictedObject(values)) return model.findByPk(values);
-  if (!values.id) return model.create(values);
+  if (values.id === undefined) {
+    console.log(model.tableName, values);
+    return model.create(values);
+  }
   const instance = await model.findByPk(values.id);
   return instance.update(values);
 }
@@ -17,19 +21,46 @@ export function manyUpsert(model, values) {
   return Promise.all(values.map(val => upsert(model, val)));
 }
 
+function sanizateAssoc(assocValues, fieldName, id) {
+  if(assocValues.id === undefined) {
+    return { ...assocValues, [fieldName]: id };
+  }
+  delete assocValues[fieldName];
+  return assocValues;
+}
+
 export async function fullUpdate(model, id, bodyParam) {
   const instance = await model.findByPk(id);
   const body = { ...bodyParam };
   const allPromisses = Object.keys(model.associations).map(async (asscKey) => {
     if (body[asscKey]) {
-      const result = await manyUpsert(model.associations[asscKey].target, body[asscKey]);
+      const assocModel = model.associations[asscKey].target;
+      const referenceFields = Object.values(assocModel.rawAttributes).filter(
+        field => field.references && field.references.model === model.name,
+      );
+
+      if (referenceFields.length !== 1) {
+        return 0;
+      }
+
+      const values = body[asscKey]
+        .map(val => sanizateAssoc(val, referenceFields[0].fieldName, id));
+      
+      await assocModel.destroy({
+        where: {
+          [referenceFields[0].fieldName]: id,
+          id: { [Op.notIn]: values.filter(a => !!a.id).map(a => a.id) },
+        },
+      });
+      
+      const result = await manyUpsert(assocModel, values);
+      
       await instance[`set${capitalize(asscKey)}`](result);
       delete body[asscKey];
       return 1;
     }
     return 0;
   });
-
   await Promise.all(allPromisses);
   return instance.update(body);
 }

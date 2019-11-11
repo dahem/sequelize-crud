@@ -5,7 +5,7 @@ import addBasicRouters from './addBasicRouters';
 export default (model, options = {}) => {
   if (model === null || model === undefined) {
     return (req, res, next) => {
-      next(new Error('model invalid'));
+      next(new Error('model invalid, can not read o model'));
     };
   }
   const { controller } = options;
