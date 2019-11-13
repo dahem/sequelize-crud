@@ -1,6 +1,6 @@
 {
   "name": "sequelize-crud",
-  "version": "1.2.10",
+  "version": "1.2.11",
   "description": "sequelize utilitary from fast CRUD",
   "main": "lib/index.js",
   "repository": {

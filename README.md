@@ -53,17 +53,17 @@ import { defaultColumns } from 'sequelize-crud/lib/models/migration';
 ...defaultColumns(Sequelize), = 
 {
   externalId: { type: Sequelize.INTEGER },
-  active: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: true },
+  isActive: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: true },
   createdAt: { type: Sequelize.DATE },
   updatedAt: { type: Sequelize.DATE },
   deletedAt: { type: Sequelize.DATE },
 })
 
-import { activeAndExternalField } from 'sequelize-crud/lib/models/migration';
+import { isActiveAndExternalField } from 'sequelize-crud/lib/models/migration';
 
-...activeAndExternalField(Sequelize) = 
+...isActiveAndExternalField(Sequelize) = 
 externalId: { type: Sequelize.INTEGER },
-active: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: true },
+isActive: { type: Sequelize.BOOLEAN, allowNull: false, defaultValue: true },
   
 ```
 
