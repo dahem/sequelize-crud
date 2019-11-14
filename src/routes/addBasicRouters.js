@@ -7,7 +7,7 @@ import validate from './validateRequest';
 import { sanitizeToCreate, sanitizeToUpdate } from './sanitize';
 
 export default function (router, controller, model, options = {}) {
-  const { methods, uuid } = options;
+  const { methods, uuid, returnFullData } = options;
 
   if (!methods || methods.includes('getAll')) {
     router.get('/', async (req, res, next) => {
@@ -80,7 +80,12 @@ export default function (router, controller, model, options = {}) {
       validate([body().custom(values => model.validateToCreate(values))]),
       async (req, res, next) => {
         try {
-          const instance = await controller.create(req.body);
+          let instance = null;
+          if (returnFullData) {
+            instance = await controller.create(req.body, { returnFullData: true });
+          } else {
+            instance = await controller.create(req.body);
+          }
           return res.status(201).send(instance);
         } catch (e) {
           return next(e);
@@ -109,7 +114,12 @@ export default function (router, controller, model, options = {}) {
       ]),
       async (req, res, next) => {
         try {
-          const instance = await controller.update(req.params.id, req.body);
+          let instance = null;
+          if (returnFullData) {
+            instance = await controller.update(req.params.id, req.body, { returnFullData: true });
+          } else {
+            instance = await controller.update(req.params.id, req.body);
+          }
           return res.status(200).send(instance);
         } catch (e) {
           return next(e);
@@ -137,7 +147,12 @@ export default function (router, controller, model, options = {}) {
       ]),
       async (req, res, next) => {
         try {
-          const instance = await controller.update(req.params.id, req.body);
+          let instance = null;
+          if (returnFullData) {
+            instance = await controller.update(req.params.id, req.body, { returnFullData: true });
+          } else {
+            instance = await controller.update(req.params.id, req.body);
+          }
           return res.status(200).send(instance);
         } catch (e) {
           return next(e);

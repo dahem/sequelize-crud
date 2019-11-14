@@ -38,12 +38,18 @@ function getById(model, id, options) {
 
 async function create(model, body, options) {
   const instance = await model.fullCreate(body);
-  return getById(model, instance.id, options);
+  if (options.returnFullData) {
+    return getById(model, instance.id, options);
+  }
+  return { id: instance.id, created: true };
 }
 
 async function update(model, id, body, options) {
   await model.fullUpdate(id, body);
-  return getById(model, id, options);
+  if (options.returnFullData) {
+    return getById(model, id, options);
+  }
+  return { id, updated: true };
 }
 
 async function remove(model, id, options) {
