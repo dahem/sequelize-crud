@@ -53,7 +53,12 @@ async function update(model, id, body, options) {
 }
 
 async function remove(model, id, options) {
-  return model.destroy({ where: { id }, ...options });
+  const result = await model.destroy({ where: { id }, ...options });
+
+  if (result === 1) return { id, removed: true };
+
+  if (result > 1) throw new Error('Warning deleted more the one');
+  throw new Error('warning not deleted any record');
 }
 
 async function getAll(model, queryParm, options) {
