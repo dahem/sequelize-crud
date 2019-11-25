@@ -34,26 +34,38 @@ export async function fullUpdate(model, id, bodyParam) {
   const allPromisses = Object.keys(model.associations).map(async (asscKey) => {
     if (body[asscKey]) {
       const assocModel = model.associations[asscKey].target;
-      const referenceFields = Object.values(assocModel.rawAttributes).filter(
-        field => field.references && field.references.model === model.name,
-      );
+      let result = null;
+      if (Array.isArray(body[asscKey])) {
+        const referenceFields = Object.values(assocModel.rawAttributes).filter(
+          field => field.references && field.references.model === model.name,
+        );
 
-      if (referenceFields.length !== 1) {
-        return 0;
+        if (referenceFields.length !== 1) {
+          return 0;
+        }
+
+        const values = body[asscKey]
+          .map(val => sanizateAssoc(val, referenceFields[0].fieldName, id));
+        
+        await assocModel.destroy({
+          where: {
+            [referenceFields[0].fieldName]: id,
+            id: { [Op.notIn]: values.filter(a => !!a.id).map(a => a.id) },
+          },
+        });
+        
+        result = await manyUpsert(assocModel, values);
+      } else {
+        const referenceFields = Object.values(model.rawAttributes).filter(
+          field => field.references && field.references.model === assocModel.name,
+        );
+
+        if (referenceFields.length !== 1) {
+          return 0;
+        }
+
+        result = await upsert(assocModel, body[asscKey]);
       }
-
-      const values = body[asscKey]
-        .map(val => sanizateAssoc(val, referenceFields[0].fieldName, id));
-      
-      await assocModel.destroy({
-        where: {
-          [referenceFields[0].fieldName]: id,
-          id: { [Op.notIn]: values.filter(a => !!a.id).map(a => a.id) },
-        },
-      });
-      
-      const result = await manyUpsert(assocModel, values);
-      
       await instance[`set${capitalize(asscKey)}`](result);
       delete body[asscKey];
       return 1;
@@ -73,8 +85,7 @@ async function updateAssoc(values, fieldName, id, model) {
     }));
     result = await manyUpsert(model, assocBody);
   } else {
-    const assocBody = { ...values, [fieldName]: id };
-    result = await upsert(model, assocBody);
+    result = await upsert(model, values);
   }
   return result;
 }
@@ -83,14 +94,19 @@ export async function fullCreate(model, body) {
   const instance = await model.create(body);
   const allPromisses = Object.keys(model.associations).map(async (asscKey) => {
     if (!body[asscKey]) return 0;
-
     const assocModel = model.associations[asscKey].target;
-    const referenceFields = Object.values(assocModel.rawAttributes).filter(
-      field => field.references && field.references.model === model.name,
-    );
-
+    let referenceFields = null;
+    if (Array.isArray(body[asscKey])) {
+      referenceFields = Object.values(assocModel.rawAttributes).filter(
+        field => field.references && field.references.model === model.name,
+      );
+    } else {
+      referenceFields = Object.values(model.rawAttributes).filter(
+        field => field.references && field.references.model === assocModel.name,
+      );
+    }
     if (referenceFields.length === 1) {
-      const result = updateAssoc(
+      const result = await updateAssoc(
         body[asscKey],
         referenceFields[0].fieldName,
         instance.id,
