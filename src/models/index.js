@@ -8,10 +8,11 @@ import { validateToCreate, validateToUpdate } from './validate';
 
 export async function upsert(model, values) {
   if (!isExtrictedObject(values)) return model.findByPk(values);
-  if (values.id === undefined) {
+  if (values.id === undefined || assocValues.id === null) {
     return model.create(values);
   }
   const instance = await model.findByPk(values.id);
+  if (!instance) return null;
   return instance.update(values);
 }
 
@@ -21,7 +22,7 @@ export function manyUpsert(model, values) {
 }
 
 function sanizateAssoc(assocValues, fieldName, id) {
-  if(assocValues.id === undefined) {
+  if(assocValues.id === undefined || assocValues.id === null) {
     return { ...assocValues, [fieldName]: id };
   }
   delete assocValues[fieldName];
@@ -35,13 +36,15 @@ export async function fullUpdate(model, id, bodyParam) {
     if (body[asscKey]) {
       const assocModel = model.associations[asscKey].target;
       let result = null;
+      // 1:n or n:m
       if (Array.isArray(body[asscKey])) {
         const referenceFields = Object.values(assocModel.rawAttributes).filter(
           field => field.references && field.references.model === model.name,
         );
-
+        // n:m 
         if (referenceFields.length !== 1) {
-          return 0;
+          await instance[`set${capitalize(asscKey)}`](body[asscKey]);
+          return 1;
         }
 
         const values = body[asscKey]
@@ -55,7 +58,7 @@ export async function fullUpdate(model, id, bodyParam) {
         });
         
         result = await manyUpsert(assocModel, values);
-      } else {
+      } else { // 1:1 or n:1
         const referenceFields = Object.values(model.rawAttributes).filter(
           field => field.references && field.references.model === assocModel.name,
         );
@@ -96,11 +99,16 @@ export async function fullCreate(model, body) {
     if (!body[asscKey]) return 0;
     const assocModel = model.associations[asscKey].target;
     let referenceFields = null;
-    if (Array.isArray(body[asscKey])) {
+    if (Array.isArray(body[asscKey])) {   // 1:n or n:m
       referenceFields = Object.values(assocModel.rawAttributes).filter(
         field => field.references && field.references.model === model.name,
       );
-    } else {
+      // n:m 
+      if (referenceFields.length !== 1) {
+        await instance[`set${capitalize(asscKey)}`](body[asscKey]);
+        return 1;
+      }
+    } else { // 1:1 or n:1
       referenceFields = Object.values(model.rawAttributes).filter(
         field => field.references && field.references.model === assocModel.name,
       );
