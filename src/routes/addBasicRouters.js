@@ -76,7 +76,8 @@ export default function (router, controller, model, options = {}) {
   if (!methods || methods.includes('create')) {
     router.post(
       '/',
-      sanitizeBody().customSanitizer(values => sanitizeToCreate(model, values)),
+      // TODO test this before
+      // sanitizeBody().customSanitizer(values => sanitizeToCreate(model, values)),
       validate([body().custom(values => model.validateToCreate(values))]),
       async (req, res, next) => {
         try {
